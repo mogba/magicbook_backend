@@ -20,6 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# TODO: Add secret key from environment variable
 SECRET_KEY = 'django-insecure-@aigf^&(8i2!(@l^oj7b*t!nrtu&af2k#%bi0#yr18*(b8q6jy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -73,11 +74,10 @@ WSGI_APPLICATION = 'magicbook_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+from infra.db.supabase import SUPABASE_CONFIG
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': SUPABASE_CONFIG
 }
 
 
