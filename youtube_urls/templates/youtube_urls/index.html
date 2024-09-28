@@ -1,0 +1,37 @@
+<html>
+  <body>
+    <form action="{% url 'youtube_urls:create' %}" method="post">
+      {% csrf_token %}
+      <fieldset>
+        {% if error_message %}
+        <p><strong>{{ error_message }}</strong></p>
+        {% endif %}
+
+        <label for="url">Input a URL you would like to save:</label>
+        <input type="text" name="url" id="url" />
+      </fieldset>
+      <input type="submit" value="Save" />
+    </form>
+
+    {% if urls %}
+    <ul>
+      {% for url in urls %}
+      <li>
+        <div style="display: flex; justify-content: start">
+          <div style="display: flex; flex-direction: row; gap: 10px">
+            <a href="{% url 'youtube_urls:detail' url.id %}">{{ url.url }}</a>
+
+            <form action="{% url 'youtube_urls:delete' url.id %}" method="post">
+              {% csrf_token %}
+              <input type="submit" value="Remove" />
+            </form>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No URLs are saved.</p>
+    {% endif %}
+  </body>
+</html>

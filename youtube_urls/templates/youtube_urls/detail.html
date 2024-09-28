@@ -1,0 +1,26 @@
+<html>
+  <body>
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <div>
+        <span>Click the URL to open it in a new tab.</span>
+        <a href="{{ url }}">{{ url }}</a>
+      </div>
+    </div>
+
+    <br />
+    <form action="{% url 'youtube_urls:update' url.id %}" method="post">
+      {% csrf_token %}
+      <fieldset>
+        {% if error_message %}
+        <p><strong>{{ error_message }}</strong></p>
+        {% endif %}
+
+        <label for="url">
+          Edit the URL by providing a new URL in the form below:
+        </label>
+        <input type="text" name="url" id="url" />
+      </fieldset>
+      <input type="submit" value="Save" />
+    </form>
+  </body>
+</html>
