@@ -3,8 +3,14 @@
     <form action="{% url 'youtube_urls:create' %}" method="post">
       {% csrf_token %}
       <fieldset>
-        {% if error_message %}
-        <p><strong>{{ error_message }}</strong></p>
+        {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+          <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+            <p><strong>{{ message }}</strong></p>
+          </li>
+          {% endfor %}
+        </ul>
         {% endif %}
 
         <label for="url">Input a URL you would like to save:</label>
