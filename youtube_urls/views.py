@@ -2,9 +2,9 @@ import re
 
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from urllib.parse import urlparse, parse_qs
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
+from urllib.parse import urlparse, parse_qs
 
 from .models import Url
 
