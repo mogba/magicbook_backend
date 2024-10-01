@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'djoser',
+    'drf_spectacular',
     # Apps
     'youtube_urls.apps.YoutubeUrlsConfig',
 ]
@@ -152,6 +153,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework_simplejwt.authentication.JWTAuthentication'],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Magicbook API',
+    'DESCRIPTION': 'Save your favorite YouTube Videos',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 # JWT Authentication

@@ -2,6 +2,7 @@ django
 djangorestframework
 djangorestframework-simplejwt
 djoser
+drf_spectacular
 django-cors-headers
 python-dotenv
 psycopg2-binary
