@@ -11,13 +11,15 @@ from core.serializers import ModelSerializer
 from .models import Url
 
 class YouTubeUrlsListApiView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
-
   def get(self, request):
-    """"
+    """
     Lists all URLs for the current user.
     """
     urls = Url.objects.filter(user = request.user.id)
+
+    if urls.count() == 0:
+      return Response({ "error": "No URLs found" }, status = status.HTTP_404_NOT_FOUND)
+
     serializer = ModelSerializer(urls, many = True)
     return Response(serializer.data, status = status.HTTP_200_OK)
 
@@ -44,13 +46,13 @@ class YouTubeUrlsDetailApiView(APIView):
     return Response(serializer.data, status = status.HTTP_200_OK)
   
   def put(self, request, id):
-    """"
+    """
     Updates a URL by a given ID.
     """
     return save(request, id)
   
   def delete(self, request, id):
-    """"
+    """
     Deletes a URL by a given ID.
     """
     url = get_object(id, request.user)
