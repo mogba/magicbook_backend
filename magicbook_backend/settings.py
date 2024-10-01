@@ -18,6 +18,8 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ENVIRONMENT = os.environ.get("ENVIRONMENT")
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -62,17 +64,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'magicbook_backend.urls'
-
-
-# CORS
-
-CORS_ALLOWED_ORIGINS = [
-    os.environ.get("WEBCLIENT_URL"),
-]
-
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOW_HEADERS = ['authorization', 'content-type']
 
 
 TEMPLATES = [
@@ -149,6 +140,17 @@ STATIC_ROOT = BASE_DIR/'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+# CORS
+
+CORS_ALLOWED_ORIGINS = [
+    os.environ.get("WEBCLIENT_URL"),
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = ['authorization', 'content-type']
+
+
 # REST Framework
 
 REST_FRAMEWORK = {
@@ -170,3 +172,21 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days = 1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days = 2),
 }
+
+# We don't need this one, as we're using JWT-based authentication, so the server
+# doesn't store any session data.
+# CSRF_COOKIE_SECURE = True
+
+CSRF_TRUSTED_ORIGINS = [
+    os.environ.get("WEBCLIENT_URL"),
+]
+
+if ENVIRONMENT == "production":
+    # The app is deployed on Vercel, which handles SSL/TLS for us. We need to tell
+    # Django to redirect all HTTP requests to HTTPS. If the app would be deployed
+    # using a VM, we would also need to manually set up NGINX with SSL/TLS.
+    SECURE_SSL_REDIRECT = ENVIRONMENT == "production"
+
+    SECURE_HSTS_SECONDS = 31536000 # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
