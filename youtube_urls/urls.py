@@ -1,12 +1,10 @@
 from django.urls import path
 
-from . import views
+from .views import YouTubeUrlsListApiView, YouTubeUrlsDetailApiView
 
 app_name = "youtube_urls"
+
 urlpatterns = [
-    path("", views.index, name="index"),
-    path("<int:id>/", views.detail, name="detail"),
-    path("save/", views.create, name="create"),
-    path("save/<int:id>/", views.update, name="update"),
-    path("delete/<int:id>/", views.delete, name="delete"),
+    path("", YouTubeUrlsListApiView.as_view()),
+    path("<int:id>/", YouTubeUrlsDetailApiView.as_view()),
 ]

@@ -1,67 +1,113 @@
 import re
 
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
+from rest_framework import permissions, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from urllib.parse import urlparse, parse_qs
+
+from core.serializers import ModelSerializer
 
 from .models import Url
 
-def index(request):
-  urls = Url.objects.all()
-  return render(request, "youtube_urls/index.html", {"urls": urls})
+class YouTubeUrlsListApiView(APIView):
+  permission_classes = [permissions.IsAuthenticated]
 
-def detail(request, id):
-  url = get_object_or_404(Url, pk = id)
-  return render(request, "youtube_urls/detail.html", {"url": url})
+  def get(self, request):
+    """"
+    Lists all URLs for the current user.
+    """
+    urls = Url.objects.filter(user = request.user.id)
+    serializer = ModelSerializer(urls, many = True)
+    return Response(serializer.data, status = status.HTTP_200_OK)
 
-def create(request):
-  return save(request, "index")
+  def post(self, request):
+    """
+    Creates a new URL for the current user.
+    """
+    return save(request)
 
-def update(request, id):
-  return save(request, "detail", id)
 
-def save(request, view_name, id = None):
-  redirect_url = reverse(f"youtube_urls:{view_name}") if id is None else reverse(f"youtube_urls:{view_name}", kwargs = {"id": id})
+class YouTubeUrlsDetailApiView(APIView):
+  permission_classes = [permissions.IsAuthenticated]
 
+  def get(self, request, id):
+    """
+    Lists a URL by a given ID.
+    """
+    url = get_object(id, request.user)
+
+    if not url:
+      return Response(data = { "error": "URL not found." }, status = status.HTTP_404_NOT_FOUND)
+
+    serializer = ModelSerializer(url, many = False)
+    return Response(serializer.data, status = status.HTTP_200_OK)
+  
+  def put(self, request, id):
+    """"
+    Updates a URL by a given ID.
+    """
+    return save(request, id)
+  
+  def delete(self, request, id):
+    """"
+    Deletes a URL by a given ID.
+    """
+    url = get_object(id, request.user)
+    if not url:
+      return Response(data = { "error": "URL not found." }, status = status.HTTP_404_NOT_FOUND)
+
+    url.delete()
+    return Response(status = status.HTTP_200_OK)
+  
+
+def get_object(id, user):
+  """
+  Gets an object by a given ID. If the object does not exist, returns None.
+  """
   try:
-    new_url = request.POST["url"]
+    return Url.objects.get(id = id, user = user)
+  except Url.DoesNotExist:
+    return None
 
-    if not new_url:
-      raise KeyError
-  except KeyError:
-    messages.error(request, "No URL provided.")
-    return HttpResponseRedirect(redirect_url)
+def save(request, id = None):
+  """
+  Creates or updates a URL. Updates require an ID.
+  """
+  print('**************** put')
+
+  url = request.data.get("url")
+
+  if not url:
+    return Response(data = { "error": "No URL provided." }, status = status.HTTP_400_BAD_REQUEST)
   
   # This app supports two YouTube URL formats:
   # https://youtu.be/<Video ID>
   # https://www.youtube.com/watch?v=<Video ID>
   
   # Regular expression for both formats
+  # A URL like the following is invalid: https://www.youtube.com/watch?v=-VCJEEOroZM&t=31s. Need to address that.
   pattern = re.compile(
     r"^(https:\/\/)(www\.)?(youtu\.be\/[A-Za-z0-9_-]{11}|youtube\.com\/watch\?v=[A-Za-z0-9_-]{11})$"
   )
-  if pattern.match(new_url) is None:
-    messages.error(request, "Invalid URL format.")
-    return HttpResponseRedirect(redirect_url)
+  if not pattern.match(url):
+    return Response(data = { "error": "Unsupported URL format." }, status = status.HTTP_400_BAD_REQUEST)
   
-  parsed_url = urlparse(new_url)
+  parsed_url = urlparse(url)
   query_params = parse_qs(parsed_url.query)
   
   video_id = query_params["v"][0] if "v" in query_params else parsed_url.path.lstrip("/")
 
   if id is not None:
-    url = get_object_or_404(Url, pk = id)
-    url.url = new_url
-    url.video_id = video_id
-  else:
-    url = Url(url = new_url, video_id = video_id)
-  
-  url.save()
-  return HttpResponseRedirect(redirect_url)
+    url_object = get_object(id, request.user)
 
-def delete(_, id):
-  url = get_object_or_404(Url, pk = id)
-  url.delete()
-  return HttpResponseRedirect(reverse("youtube_urls:index"))
+    if not url_object:
+      return Response(data = { "error": "URL not found." }, status = status.HTTP_404_NO_CONTENT)
+
+    url_object.url = url
+    url_object.video_id = video_id
+  else:
+    url_object = Url(url = url, video_id = video_id, user = request.user)
+  
+  url_object.save()
+  return Response(status = status.HTTP_200_OK)
