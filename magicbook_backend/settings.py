@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
+
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,14 +34,18 @@ ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split("|")
 # Application definition
 
 INSTALLED_APPS = [
-    'corsheaders',
-    'rest_framework',
+    # Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Core
+    'corsheaders',
+    'rest_framework',
+    'djoser',
+    # Apps
     'youtube_urls.apps.YoutubeUrlsConfig',
 ]
 
@@ -56,6 +62,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'magicbook_backend.urls'
 
+
+# CORS
 
 CORS_ALLOWED_ORIGINS = [
     os.environ.get("WEBCLIENT_URL"),
@@ -138,3 +146,18 @@ STATIC_ROOT = BASE_DIR/'staticfiles'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# REST Framework
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework_simplejwt.authentication.JWTAuthentication'],
+}
+
+# JWT Authentication
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('JWT',),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days = 1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days = 2),
+}

@@ -1,16 +1,23 @@
 import re
 
 from rest_framework import permissions, status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from urllib.parse import urlparse, parse_qs
 
 from core.serializers import ModelSerializer
+from infra.permissions import IsOwner
 
 from .models import Url
 
-class YouTubeUrlsListApiView(APIView):
+class CustomApiView(APIView):
+  authentication_classes = [JWTAuthentication]
+  permission_classes = [IsAuthenticated, IsOwner, permissions.IsAuthenticated]
+
+
+class YouTubeUrlsListApiView(CustomApiView):
   def get(self, request):
     """
     Lists all URLs for the current user.
@@ -30,9 +37,7 @@ class YouTubeUrlsListApiView(APIView):
     return save(request)
 
 
-class YouTubeUrlsDetailApiView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
-
+class YouTubeUrlsDetailApiView(CustomApiView):
   def get(self, request, id):
     """
     Lists a URL by a given ID.
@@ -76,8 +81,6 @@ def save(request, id = None):
   """
   Creates or updates a URL. Updates require an ID.
   """
-  print('**************** put')
-
   url = request.data.get("url")
 
   if not url:
