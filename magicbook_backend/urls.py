@@ -12,5 +12,5 @@ urlpatterns = [
     path("api/auth/", include("djoser.urls")),
     path("api/auth/", include("djoser.urls.jwt")),
     # Apps
-    path("api/youtube-urls/", include("youtube_urls.urls"), name = "youtube_urls"),
+    path("api/youtube-urls/", include("youtube_urls.urls")),
 ]
