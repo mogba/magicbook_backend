@@ -25,7 +25,7 @@ class YouTubeUrlsListApiView(CustomApiView):
     urls = Url.objects.filter(user = request.user.id)
 
     if urls.count() == 0:
-      return Response({ "error": "No URLs found" }, status = status.HTTP_404_NOT_FOUND)
+      return Response({ "error": "No videos found" }, status = status.HTTP_404_NOT_FOUND)
 
     serializer = ModelSerializer(urls, many = True)
     return Response(serializer.data, status = status.HTTP_200_OK)
@@ -45,7 +45,7 @@ class YouTubeUrlsDetailApiView(CustomApiView):
     url = get_object(id, request.user)
 
     if not url:
-      return Response(data = { "error": "URL not found." }, status = status.HTTP_404_NOT_FOUND)
+      return Response(data = { "error": "Video not found." }, status = status.HTTP_404_NOT_FOUND)
 
     serializer = ModelSerializer(url, many = False)
     return Response(serializer.data, status = status.HTTP_200_OK)
@@ -62,20 +62,11 @@ class YouTubeUrlsDetailApiView(CustomApiView):
     """
     url = get_object(id, request.user)
     if not url:
-      return Response(data = { "error": "URL not found." }, status = status.HTTP_404_NOT_FOUND)
+      return Response(data = { "error": "Video not found." }, status = status.HTTP_404_NOT_FOUND)
 
     url.delete()
     return Response(status = status.HTTP_200_OK)
   
-
-def get_object(id, user):
-  """
-  Gets an object by a given ID. If the object does not exist, returns None.
-  """
-  try:
-    return Url.objects.get(id = id, user = user)
-  except Url.DoesNotExist:
-    return None
 
 def save(request, id = None):
   """
@@ -107,7 +98,7 @@ def save(request, id = None):
     url_object = get_object(id, request.user)
 
     if not url_object:
-      return Response(data = { "error": "URL not found." }, status = status.HTTP_404_NO_CONTENT)
+      return Response(data = { "error": "Video not found." }, status = status.HTTP_404_NO_CONTENT)
 
     url_object.url = url
     url_object.video_id = video_id
@@ -116,3 +107,12 @@ def save(request, id = None):
   
   url_object.save()
   return Response(status = status.HTTP_200_OK)
+
+def get_object(id, user):
+  """
+  Gets an object by a given ID. If the object does not exist, returns None.
+  """
+  try:
+    return Url.objects.get(id = id, user = user)
+  except Url.DoesNotExist:
+    return None
